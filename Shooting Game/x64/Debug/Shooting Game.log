@@ -1,0 +1,17 @@
+﻿  imgui-SFML.cpp
+  imgui.cpp
+  imgui_demo.cpp
+  imgui_draw.cpp
+  imgui_tables.cpp
+  imgui_widgets.cpp
+  main.cpp
+D:\Shooting Game\libraries\include\SFML\System\Exception.hpp(41,47): warning C4275: non dll-interface class 'std::runtime_error' used as base for dll-interface class 'sf::Exception'
+  (compiling source file 'main.cpp')
+      C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.43.34808\include\stdexcept(100,19):
+      see declaration of 'std::runtime_error'
+      D:\Shooting Game\libraries\include\SFML\System\Exception.hpp(41,23):
+      see declaration of 'sf::Exception'
+  
+D:\Shooting Game\main.cpp(120,19): warning C4834: discarding return value of function with [[nodiscard]] attribute
+  Generating Code...
+  Shooting Game.vcxproj -> D:\Shooting Game\x64\Debug\Shooting Game.exe
