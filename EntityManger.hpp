@@ -12,7 +12,17 @@ class EntityManager
 	void removeDeadEntities(EntityVec& vec)
 	{
 		//ToDO : remove all dead entites from the input vector
+		
 		//this is called by update() funciton 
+		for (auto it = vec.begin(); it != vec.end(); /* no increment */) {
+			if (!(*it)->m_active) {
+				it = vec.erase(it); // erase returns the next valid iterator
+			}
+			else {
+				++it;
+			}
+		}
+
 	}
 
 public:
@@ -21,6 +31,11 @@ public:
 	{
   // TODO : add entities from m_entitiesTOAdd the proper location(S)
 		//-- add them to the vector of all entities 
+		for (auto it : m_entitiesToAdd) {
+			m_entities.push_back(it);
+			m_entityMap[it->m_tag].push_back(it);
+		}
+		m_entitiesToAdd.clear();
 		// -- add them to the vector inside the map with the tag as a key
 
 		// remove dead entities from the vector of all entities 
