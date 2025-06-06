@@ -1,5 +1,5 @@
 #pragma once
-//#include <SFML/Graphics.hpp>
+#include <SFML/Graphics.hpp>
 #include "EntityManger.hpp"
 #include "imgui-SFML.h"
 #include "imgui.h"
@@ -22,7 +22,7 @@ class Game
 	bool          m_paused = false; //wheater we update the game logic
 	bool          m_running = true; //whether the game is running 
 
-	Game(const std::string congig);
+
 	void init(const std::string& config);//intilize the game state with a config file 
 	void setPaused(bool paused); //pause the game;
 

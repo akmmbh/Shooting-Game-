@@ -1,15 +1,36 @@
 #include "Game.h"
+#include <SFML/Graphics.hpp>
 #include <iostream>
+#include<fstream>
 
-Game::Game(const std::string& config)
-{
+Game::Game(const std::string& config){
 	init(config);
 }
+
+
 
 void Game::init(const std::string& path)
 {
 	//TODO read in config file here 
 	//use the premage PlayerConfig, ENemy COnfig , Bullet COnfig Varaibales
+	std::ifstream fin(path);
+	std::string first;
+	while (fin >> first) {
+		if (first == "Window") {
+			int www, hhh, fl, fs;
+			fin >> www >> hhh >> fl >> fs;
+			m_window.setPosition(Vec2(www, hhh));
+			m_window.setFramerateLimit(fl);
+			
+		}
+		if (first == "Font") {
+			std::string name;
+			int size, r, g, b;
+			fin >> name >> size >> r >> g >> b;
+			m_font.openFromFile(name);
+			m_font.
+		}
+	}
 
 	//set up default window parameters 
 
@@ -177,7 +198,7 @@ void Game::sRender() {
 
 	//set the rotation of the shape based ont the entity tranfrom ->angle
 	player()->get<CTransform>().angle += 1.0f;
-	player()->get<CShape>().circle.setRotation(player()->get<CTransform>().angle);
+	player()->get<CShape>().circle.setRotation(sf::degrees(player()->get<CTransform>().angle));
 
 	//draw the entity sf::CircleShape
 
@@ -197,55 +218,123 @@ void Game::sUserInput()
 	//you should not implement the player movement logic here
 	//the movement system will read the variable you set in this function 
 
-	sf::Event event;
-	while (m_window.pollEvent(event)) {
+	//sf::Event event;
+	while (m_window.isOpen()/*m_window.pollEvent(event)*/) {
 
-		//pass the event to imgui to be parserd 
-		ImGui::SFML::ProcessEvent(m_window, event);
-
-		//this event triggers when the window is closed
-		if (event.type == sf::Event::Closed) {
-			m_running = false;
-		}
-
-		//this event is triggered when a key is pressed 
-		if (event.type == sf::Event::KeyPressed)
+		while (const auto eventOpt = m_window.pollEvent())
 		{
-			switch (event.key.code)
+			ImGui::SFML::ProcessEvent(m_window, *eventOpt);
+			if (eventOpt->is<sf::Event::Closed>())m_running=false;
+
+			if (eventOpt->is<sf::Event::KeyPressed>())
 			{
-			case sf::Keyboard::W:
-					std::cout << "W KEY is pressed\n";
-					//TODO set player input component "UP" to true;
+				switch (eventOpt->getIf<sf::Event::KeyPressed>()->code)
+				{
+				case sf::Keyboard::Key::W:
+					std::cout << "W key is pressed\n";
+					//Todo set player input comment up to true
+					break;
+				case sf::Keyboard::Key::A:
+					std::cout << "A key is pressed\n";
+					//todo set player input comment up to true;
+					break;
+				case sf::Keyboard::Key::S:
+					std::cout << "S key is pressed";
+					break;
+				case sf::Keyboard::Key::D:
+					std::cout << "D key is pressed";
+					break;
+				default: break;
+				}
+
+				switch (eventOpt->getIf<sf::Event::KeyReleased>()->code)
+				{
+				case sf::Keyboard::Key::W:
+					std::cout << "W is released";
+					break;
+				case sf::Keyboard::Key::A:
+					std::cout << "A is released";
+					break;
+				case sf::Keyboard::Key::S:
+					std::cout << "S key is released";
+					break;
+				case sf::Keyboard::Key::D:
+					std::cout << "D key is released";
 					break;
 				default:break;
+				}
+				
 			}
-		}
-		if (event.type == sf::Event::KeyReleased)
-		{
-			switch (event.key.code)
+			if(eventOpt->getIf<sf::Event::MouseButtonPressed>())
 			{
-			case sf::Keyboard::W:
-				std::cout << "W key released\n";
-				//Todo: set player input component  up to false
-				break;
-			default:break;
+
+             //if mouse clicked in imgui continue
+				if (ImGui::GetIO().WantCaptureMouse)continue;
+				if (eventOpt->getIf<sf::Event::MouseButtonPressed>()->button == sf::Mouse::Button::Left)
+				{
+					std::cout << "left mouse button is clicked on " << eventOpt->getIf<sf::Event::MouseButtonPressed>()->position.x << " " << eventOpt->getIf<sf::Event::MouseButtonPressed>()->position.y << " ";
+					//spawn bullet here
+
+
+				}
+				if (eventOpt->getIf<sf::Event::MouseButtonPressed>()->button == sf::Mouse::Button::Right)
+				{
+					std::cout << "left mouse button is clicked on " << eventOpt->getIf<sf::Event::MouseButtonPressed>()->position.x << " " << eventOpt->getIf<sf::Event::MouseButtonPressed>()->position.y << " ";
+
+
+				}
 			}
+			
+		
+
+		//pass the event to imgui to be parserd 
+
+		//ImGui::SFML::ProcessEvent(m_window, event);
+
+		//this event triggers when the window is closed
+		
+	/*	if (event.type == sf::Event::Closed) {
+			m_running = false;
+		}*/
+
+		//this event is triggered when a key is pressed 
+		//if (event.type == sf::Event::KeyPressed)
+		//{
+		//	switch (event.key.code)
+		//	{
+		//	case sf::Keyboard::W:
+		//			std::cout << "W KEY is pressed\n";
+		//			//TODO set player input component "UP" to true;
+		//			break;
+		//		default:break;
+		//	}
+		//}
+		//if (event.type == sf::Event::KeyReleased)
+		//{
+		//	switch (event.key.code)
+		//	{
+		//	case sf::Keyboard::W:
+		//		std::cout << "W key released\n";
+		//		//Todo: set player input component  up to false
+		//		break;
+		//	default:break;
+		//	}
 
 		}
-		if (event.type == sf::Event::MouseButtonPressed)
-		{
-			//this line ignores mouse events if ImGUi is the thing being clicked 
-			if (ImGui::GetIO().WnatCaptureMouse) { continue; }
+		//if (event.type == sf::Event::MouseButtonPressed)
+		//{
+		//	//this line ignores mouse events if ImGUi is the thing being clicked 
+		//	if (ImGui::GetIO().WantCaptureMouse) { continue; }
 
-			if (event.mouseButton.button == sf::Mouse::Left) {
-				std::cout << "Left mouse button cliecket at " << event.mouseButton.x << ",";
-				//call spawn Bullet here
-			}
-			if (event.mouseButton.button == sf::Mouse::Right)
-			{
-				std::cout << "Right Mouse Button CLicket at (" << event.mouseButton.x << ",";
-			}
-		}
+		//	if (event.mouseButton.button == sf::Mouse::Left) {
+		//		std::cout << "Left mouse button cliecket at " << event.mouseButton.x << ",";
+		//		//call spawn Bullet here
+		//	}
+		//	if (event.mouseButton.button == sf::Mouse::Right)
+		//	{
+		//		std::cout << "Right Mouse Button CLicket at (" << event.mouseButton.x << ",";
+		//	}
+		//}
 
 	}
 }
