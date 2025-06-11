@@ -34,6 +34,7 @@ public:
 		circle.setOrigin(Vec2f(radius,radius));
 
 	}
+
 };
 class CCollision : public Component
 {

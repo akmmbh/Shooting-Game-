@@ -137,13 +137,14 @@ void Game::spawnEnemy()
 	//TODO:make sure the enemy is spawned properly with the m_enemey Config variables 
 	// the enemy mush be spawneed completely within bounds fo the window 
 	auto entity = m_entities.addEntity("enemy");
-	Vec2 dis = Vec2(rand_gen(0, (int)m_window.getSize().x), rand_gen(0, (int)m_window.getSize().y));
+	Vec2 dis = Vec2(rand_gen(m_enemyConfig.SR, (int)m_window.getSize().x), rand_gen(m_enemyConfig.SR, (int)m_window.getSize().y));
 	Vec2 velocity = Vec2(rand_gen(m_enemyConfig.VMIN, m_enemyConfig.VMAX), rand_gen(m_enemyConfig.VMIN, m_enemyConfig.VMAX));
 	float angle = atan2f(velocity.y, velocity.x);
+	int vertex = rand_gen(m_enemyConfig.VMIN, m_enemyConfig.VMAX);
 	entity->add<CTransform>(dis,velocity,angle);
-	entity->add<CShape>(m_enemyConfig.SR,rand_gen(m_enemyConfig.VMIN,m_enemyConfig.VMAX),sf::Color(0.0f,0.0f,0.0f),sf::Color(m_enemyConfig.OR,m_enemyConfig.OG,m_enemyConfig.OB),m_enemyConfig.OT);
+	entity->add<CShape>(m_enemyConfig.SR,vertex,sf::Color(0.0f,0.0f,0.0f),sf::Color(m_enemyConfig.OR,m_enemyConfig.OG,m_enemyConfig.OB),m_enemyConfig.OT);
 	entity->add<CCollision>(m_enemyConfig.CR);
-
+	entity->add<CScore>(vertex * 100);
 
 	//record when the most recenet enemy was spawned
 	m_lastEnemySpawnTime = m_currentFrame;
@@ -154,7 +155,25 @@ void Game::spawnSmallEnemies(std::shared_ptr<Entity> e)
 {
 
 	//Todo: spawn small enemies at the loacation of the input enemy e
+	Vec2 dis = e->get<CTransform>().pos;
+	Vec2 speed = e->get<CTransform>().velocity;
+	int vecspeed = sqrt(speed.x * speed.x + speed.y + speed.y);
+	auto shape = e->get<CShape>().circle;
+	int points = e->get<CScore>().score;
+	int nover = e->get<CShape>().circle.getPointCount();
+	int cr = e->get<CCollision>().radius;
+	for (int i = 0;i < nover;i++) {
+		auto entity = m_entities.addEntity("smallenemy");
+		entity->add<CScore>(points * 2);
+		Vec2 point = e->get<CShape>().circle.getPoint(i);
+		Vec2 origin = e->get<CShape>().circle.getOrigin();
+		float angle = atan2f(point.y - origin.y, point.x - origin.x);
+		
+		entity->add<CTransform>(dis, Vec2(vecspeed,vecspeed), angle);
+		entity->add<CShape>(shape.getRadius() / 2, shape.getPointCount(), shape.getFillColor(), shape.getOutlineColor(), shape.getOutlineThickness());                    
+		entity->add<CCollision>(cr / 2);
 
+	}
 	//when we create the smaller enemy we have tot read the values of the original enemy
 	//-spawn a number of small enemies equal to the vertices of the original enemy 
 	//- set each small enemy to the smae color as the original half the size 
@@ -229,6 +248,14 @@ void Game::sMovement()
 		it->get<CTransform>().pos.x += speed*cosf(angle);
 		it->get<CTransform>().pos.y += (-1)*speed * sinf(angle);
 	}
+	//now we move the small enemies
+	auto smallenemis = m_entities.getEntities("smallenemy");
+	for (auto it : smallenemis) {
+		float angle = it->get<CTransform>().angle;
+		int speeds = it->get<CTransform>().velocity.x;
+		it->get<CTransform>().pos.x += speeds*cosf(angle);
+		it->get<CTransform>().pos.y += speeds*cosf(angle);
+	}
 
 }
 void Game::sLifespan()
@@ -237,7 +264,19 @@ void Game::sLifespan()
 	//
 	//for all entites
 	//if entity has no lifespan component , skip it 
+	
 	// if entity has >0 remaining lifespan subract 1
+	for (auto it : m_entities.getEntities()) {
+		if (it->has<CLifespan>())
+		{
+		int currentlife=	it->get<CLifespan>().remaining;
+		currentlife--;
+		if (currentlife <= 0) {
+			it->destroy();
+		}
+
+		}
+	}
 	//if it has lifespan and is alive
 	// scale its alpha channel properly
 	// if it has lifespan and its time is up
@@ -259,12 +298,13 @@ void Game::sCollision() {
 			if ((pos1.x - pos.x) * (pos1.x - pos.x) + (pos1.y - pos.y) * (pos1.y - pos.y) <= (radius + radius1) * (radius + radius1))
 			{
 				e->destroy();
-				check = true;
+				m_score += e->get<CScore>().score;
 
 			}
 
 		}
 	}
+
 }
 
 void Game::sEnemySpawner()
@@ -278,6 +318,9 @@ void Game::sEnemySpawner()
 
 void Game::sGUI() {
 	ImGui::Begin("Geometry Wars");
+
+
+
 	ImGui::Text("Stuff GOes here");
 	ImGui::End();
 }
